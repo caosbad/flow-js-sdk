@@ -6,7 +6,7 @@ import Code from '../components/Code'
 import { Send } from "../helper/fcl-deployer"
 
 const simpleContract = `
-pub contract HelloWorld {
+access(all) contract HelloWorld {
   pub let greeting: String
   pub event HelloEvent(message: String)
 
@@ -21,6 +21,14 @@ pub contract HelloWorld {
 }
 `
 
+const deployScript = `
+transaction(code: String) {
+  prepare(acct: AuthAccount) {
+      acct.contracts.add(name: "HelloWorld", code: code.decodeHex())
+  }
+}
+`
+
 const DeployContract = () => {
   const [status, setStatus] = useState("Not started")
   const [transaction, setTransaction] = useState(null)
@@ -29,7 +37,7 @@ const DeployContract = () => {
     event.preventDefault()
     
     setStatus("Resolving...")
-    const result = await Send(simpleContract);
+    const result = await Send(simpleContract, deployScript);
     setStatus("Transaction Completed");
     setTransaction(result);
   }

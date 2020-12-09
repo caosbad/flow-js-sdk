@@ -6,7 +6,7 @@ import Header from '../components/Header'
 import Code from '../components/Code'
 import Point from '../model/Point'
 
-const scriptTwo = `\
+const scriptTwo = `
 pub struct SomeStruct {
   pub var x: Int
   pub var y: Int
