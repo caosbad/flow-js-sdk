@@ -219,6 +219,7 @@ export const isAccount /*  */ = (account) => Boolean(account.kind & ACCOUNT)
 export const isParam /*    */ = (param) => Boolean(param.kind & PARAM)
 export const isArgument /* */ = (argument) => Boolean(argument.kind & ARGUMENT)
 
+// 校验硬件模式
 const hardMode = (ix) => {
   for (let key of Object.keys(ix)) {
     if (!KEYS.has(key))
@@ -238,6 +239,7 @@ const recPipe = async (ix, fns = []) => {
   throw new Error("Invalid Interaction Composition")
 }
 
+// pipe the args
 export const pipe = (...args) => {
   const [arg1, arg2] = args
   if (isArray(arg1) && arg2 == null) return (d) => pipe(d, arg1)
