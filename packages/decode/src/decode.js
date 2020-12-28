@@ -125,6 +125,7 @@ export const decode = async (
   return await recurseDecode(decodeInstructions, decoders, stack)
 }
 
+// 解码响应数据
 export const decodeResponse = async (response, customDecoders = {}) => {
   let decoders = { ...defaultDecoders, ...customDecoders }
 
@@ -157,9 +158,9 @@ export const decodeResponse = async (response, customDecoders = {}) => {
         }
       })
     )
-  } else if (response.account) {
-    const acct = response.account
-    acct.code = new TextDecoder("utf-8").decode(acct.code || new UInt8Array())
+  } else if (response.account) { // 返回账户响应的数据解码，这里只对 account 中 code 的数据进行解码处理
+    const acct = response.account 
+    acct.code = new TextDecoder("utf-8").decode(acct.code || new UInt8Array()) // 解码账户的合约代码
     return acct
   } else if (response.block) {
     return response.block

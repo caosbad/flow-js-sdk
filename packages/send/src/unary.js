@@ -5,7 +5,7 @@ grpc.setDefaultTransport(NodeHttpTransport())
 
 export async function unary(host, method, request) {
   return new Promise((resolve, reject) => {
-    grpc.unary(method, {
+    grpc.unary(method, { // gRPC 获取响应数据
       request: request,
       host: host,
       onEnd: ({status, statusMessage, message}) => {

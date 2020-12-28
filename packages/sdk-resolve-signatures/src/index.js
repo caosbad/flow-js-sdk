@@ -50,7 +50,7 @@ async function fetchSignatures(ix, signers = [], message) {
     })
   )
 }
-
+// 去重
 function collateSigners(ix) {
   // inside signers are: (authorizers + proposer) - payer
   let insideSigners = new Set(ix.authorizations)
