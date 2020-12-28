@@ -30,7 +30,7 @@ const decodeVoid = async () => null
 const decodeOptional = async (optional, decoders, stack) =>
   optional ? await recurseDecode(optional, decoders, stack) : null
 
-const decodeReference = async (v) => ({address: v.address, type: v.type})
+const decodeReference = async (v) => ({ address: v.address, type: v.type })
 
 const decodeArray = async (array, decoders, stack) =>
   await Promise.all(
@@ -121,16 +121,16 @@ export const decode = async (
   customDecoders = {},
   stack = []
 ) => {
-  let decoders = {...defaultDecoders, ...customDecoders}
+  let decoders = { ...defaultDecoders, ...customDecoders }
   return await recurseDecode(decodeInstructions, decoders, stack)
 }
 
 export const decodeResponse = async (response, customDecoders = {}) => {
-  let decoders = {...defaultDecoders, ...customDecoders}
+  let decoders = { ...defaultDecoders, ...customDecoders }
 
-  if (response.encodedData) {
+  if (response.encodedData) { // 返回的查询数据解码
     return await decode(response.encodedData, decoders)
-  } else if (response.transaction) {
+  } else if (response.transaction) {  // 返回的交易数据解码
     return {
       ...response.transaction,
       events: await Promise.all(

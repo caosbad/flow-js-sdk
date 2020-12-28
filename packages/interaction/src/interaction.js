@@ -53,14 +53,14 @@ const ARG = `{
 }`
 
 const IX = `{
-  "tag":${UNKNOWN},
+  "tag":${UNKNOWN}, // 查询或交易的结构
   "assigns":{},
-  "status":${OK},
+  "status":${OK}, // 交易体的状态
   "reason":null,
-  "accounts":{},
-  "params":{},
-  "arguments":{},
-  "message": {
+  "accounts":{}, // 账户信息
+  "params":{}, // 参数
+  "arguments":{}, // 参数 TODO？
+  "message": { // 交易相关数据
     "cadence":null,
     "refBlock":null,
     "computLimit":null,
@@ -102,7 +102,7 @@ const isFn = (d) => typeof d === "function"
 
 const CHARS = "abcdefghijklmnopqrstuvwxyz0123456789".split("")
 const randChar = () => CHARS[~~(Math.random() * CHARS.length)]
-export const uuid = () => Array.from({length: 10}, randChar).join("")
+export const uuid = () => Array.from({ length: 10 }, randChar).join("")
 
 export const isInteraction = (ix) => {
   if (!isObj(ix) || isNull(ix) || isNumber(ix)) return false
@@ -158,7 +158,7 @@ export const makePayer = (acct) => (ix) => {
   let tempId = uuid()
   ix.payer = tempId
   return Ok(pipe(ix, [makeAccount(acct, tempId)]))
-} 
+}
 
 export const makeParam = (param) => (ix) => {
   let tempId = uuid()
@@ -228,11 +228,11 @@ const hardMode = (ix) => {
 }
 
 const recPipe = async (ix, fns = []) => {
-  ix = hardMode(await ix)
-  if (isBad(ix) || !fns.length) return ix
-  const [hd, ...rest] = fns
+  ix = hardMode(await ix) // 严格校验与 IX 结构比对
+  if (isBad(ix) || !fns.length) return ix // 判断处理的错误状态或结束递归的条件
+  const [hd, ...rest] = fns // 处理函数拆分
   const cur = await hd
-  if (isFn(cur)) return recPipe(cur(ix), rest)
+  if (isFn(cur)) return recPipe(cur(ix), rest) // 不同逻辑的递归处理
   if (isNull(cur) || !cur) return recPipe(ix, rest)
   if (isInteraction(cur)) return recPipe(cur, rest)
   throw new Error("Invalid Interaction Composition")
@@ -240,8 +240,8 @@ const recPipe = async (ix, fns = []) => {
 
 export const pipe = (...args) => {
   const [arg1, arg2] = args
-  if (isArray(arg1) && arg2 == null) return (d) => pipe(d, arg1)
-  return recPipe(arg1, arg2)
+  if (isArray(arg1) && arg2 == null) return (d) => pipe(d, arg1) // 拆分链式调用的数组函数
+  return recPipe(arg1, arg2) // 启动递归处理
 }
 
 const identity = (v) => v

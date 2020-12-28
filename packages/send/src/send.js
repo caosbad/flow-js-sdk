@@ -9,21 +9,22 @@ import {
   isGetBlockByHeight,
   isPing,
 } from "@onflow/interaction"
-import {sendTransaction} from "./send-transaction"
-import {sendGetTransactionStatus} from "./send-get-transaction-status"
-import {sendExecuteScript} from "./send-execute-script"
-import {sendGetAccount} from "./send-get-account"
-import {sendGetEvents} from "./send-get-events"
-import {sendGetLatestBlock} from "./send-get-latest-block"
-import {sendGetBlockById} from "./send-get-block-by-id"
-import {sendGetBlockByHeight} from "./send-get-block-by-height"
-import {sendPing} from "./send-ping"
-import {config} from "@onflow/config"
+import { sendTransaction } from "./send-transaction"
+import { sendGetTransactionStatus } from "./send-get-transaction-status"
+import { sendExecuteScript } from "./send-execute-script"
+import { sendGetAccount } from "./send-get-account"
+import { sendGetEvents } from "./send-get-events"
+import { sendGetLatestBlock } from "./send-get-latest-block"
+import { sendGetBlockById } from "./send-get-block-by-id"
+import { sendGetBlockByHeight } from "./send-get-block-by-height"
+import { sendPing } from "./send-ping"
+import { config } from "@onflow/config"
 
 export const send = async (ix, opts = {}) => {
-  opts.node = opts.node || (await config().get("accessNode.api"))
-  ix = await ix
+  opts.node = opts.node || (await config().get("accessNode.api")) // 初始化自定义节点配置
+  ix = await ix // 
 
+  // 根据交易类型，决定返回具体的交易方法
   switch (true) {
     case isTransaction(ix):
       return sendTransaction(ix, opts)
@@ -31,7 +32,7 @@ export const send = async (ix, opts = {}) => {
       return sendGetTransactionStatus(ix, opts)
     case isScript(ix):
       return sendExecuteScript(ix, opts)
-    case isGetAccount(ix):
+    case isGetAccount(ix): // 路由到相对的查询
       return sendGetAccount(ix, opts)
     case isGetEvents(ix):
       return sendGetEvents(ix, opts)
