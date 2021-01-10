@@ -11,7 +11,7 @@ const GetAccount = () => {
 
   const runGetAccount = async (event: any) => {
     event.preventDefault()
-
+    console.log(fcl.getAccount(addr), 'addr ==========')
     const response = await fcl.send([
       fcl.getAccount(addr),
     ])

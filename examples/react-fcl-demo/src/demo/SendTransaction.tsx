@@ -4,6 +4,7 @@ import * as fcl from "@onflow/fcl"
 import Card from '../components/Card'
 import Header from '../components/Header'
 import Code from '../components/Code'
+import CurrentUser from "./Authenticate"
 
 const simpleTransaction = `\
 transaction {
@@ -21,7 +22,8 @@ const SendTransaction = () => {
     event.preventDefault()
     
     setStatus("Resolving...")
-
+    const userInfo = await fcl.currentUser().snapshot()
+    console.log(userInfo, '===============')
     try {
       const { transactionId } = await fcl.send([
         fcl.transaction(simpleTransaction),
