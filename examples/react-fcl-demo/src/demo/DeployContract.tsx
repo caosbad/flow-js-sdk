@@ -29,7 +29,7 @@ const DeployContract = () => {
     event.preventDefault()
     
     setStatus("Resolving...")
-    const result = await Send(simpleContract);
+    const result = await Send(simpleContract); // 封装的合约部署函数
     setStatus("Transaction Completed");
     setTransaction(result);
   }
