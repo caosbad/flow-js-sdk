@@ -33,6 +33,7 @@ const DATA = `{
   "services":[]
 }`
 
+// 支持 sessionStorage 存储
 const coldStorage = {
   get: async () => {
     const fallback = JSON.parse(DATA)
@@ -48,15 +49,15 @@ const coldStorage = {
     return data
   },
 }
-
+// 获取是否支持硬件钱包的配置，默认 true
 const canColdStorage = () => {
   return config().get("persistSession", true)
 }
-
+// 操作接口
 const HANDLERS = {
   [INIT]: async ctx => {
-    ctx.merge(JSON.parse(DATA))
-    if (await canColdStorage()) {
+    ctx.merge(JSON.parse(DATA)) // 初始化用户信息数据结构
+    if (await canColdStorage()) { // 如果支持 sessionStorage，则加载信息
       const user = await coldStorage.get()
       if (notExpired(user)) ctx.merge(user)
     }
@@ -97,30 +98,33 @@ function notExpired(user) {
 async function authenticate() {
   return new Promise(async resolve => {
     spawnCurrentUser()
+    // 获取当前用户的快照信息
     const user = await snapshot()
+    // 如果用户有登录的信息则直接返回
     if (user.loggedIn && notExpired(user)) return resolve(user)
-
+    // 通过 iframe 的方式呼出授权界面
     const [$frame, unrender] = renderAuthnFrame({
-      handshake: await config().get("challenge.handshake"),
-      l6n: window.location.origin,
+      handshake: await config().get("challenge.handshake"), // 在 fcl 配置中配置的第三方授权服务地址，localhost 是依赖 dev-wallet 测试网依赖 blocto
+      l6n: window.location.origin,  // 当前页面的 url
     })
 
+    // 定义响应函数
     const replyFn = async ({data}) => {
-      if (data.type === CHALLENGE_CANCEL_EVENT || data.type === CANCEL_EVENT) {
+      if (data.type === CHALLENGE_CANCEL_EVENT || data.type === CANCEL_EVENT) { // 取消授权，关闭窗口，取消事件监听
         unrender()
         window.removeEventListener("message", replyFn)
         return
       }
-      if (data.type !== CHALLENGE_RESPONSE_EVENT) return
-
+      if (data.type !== CHALLENGE_RESPONSE_EVENT) return // 非登录响应的数据都返回
+      // 正常的数据响应流程
       unrender()
       window.removeEventListener("message", replyFn)
 
-      send(NAME, SET_CURRENT_USER, await buildUser(data))
-      resolve(await snapshot())
+      send(NAME, SET_CURRENT_USER, await buildUser(data)) // 根据返回的数据初始化用户信息，并设置给 ctx
+      resolve(await snapshot()) // 返回用户信息
     }
 
-    window.addEventListener("message", replyFn)
+    window.addEventListener("message", replyFn) // 添加消息的响应函数
   })
 }
 
@@ -165,12 +169,13 @@ function rawr(authz) {
   return result
 }
 
+// 签名函数
 async function authorization(account) {
   spawnCurrentUser()
-  const user = await authenticate()
-  const authz = serviceOfType(user.services, "authz")
+  const user = await authenticate() // 获得当前登录用户信息
+  const authz = serviceOfType(user.services, "authz") // 遍历匹配 authz 签名相关信息
 
-  const preAuthz = serviceOfType(user.services, "pre-authz")
+  const preAuthz = serviceOfType(user.services, "pre-authz") // 适配预签名
   if (preAuthz) {
     return {
       ...account,
@@ -180,7 +185,7 @@ async function authorization(account) {
       },
     }
   }
-
+  // 返回用户信息和签名授权函数
   return {
     ...account,
     tempId: "CURRENT_USER",
@@ -189,18 +194,18 @@ async function authorization(account) {
     keyId: authz.identity.keyId,
     sequenceNum: null,
     signature: null,
-    async signingFunction(signable) {
-      return execService(authz, signable)
+    async signingFunction(signable) { // 签名授权函数 signable 为交易体
+      return execService(authz, signable) // 返回签名后的数据
     },
   }
 }
 
 function subscribe(callback) {
-  spawnCurrentUser()
-  const EXIT = "@EXIT"
-  const self = spawn(async ctx => {
-    ctx.send(NAME, SUBSCRIBE)
-    while (1) {
+  spawnCurrentUser()  // 初始化
+  const EXIT = "@EXIT" // 定义退出条件
+  const self = spawn(async ctx => {  // 初始化一个新的上下文
+    ctx.send(NAME, SUBSCRIBE) // 发送订阅消息
+    while (1) { // 定义监听循环
       const letter = await ctx.receive()
       if (letter.tag === EXIT) {
         ctx.send(NAME, UNSUBSCRIBE)
@@ -209,11 +214,11 @@ function subscribe(callback) {
       callback(letter.data)
     }
   })
-  return () => send(self, EXIT)
+  return () => send(self, EXIT) // 结束监听，
 }
 
 function snapshot() {
-  spawnCurrentUser()
+  spawnCurrentUser() // 初始化上下文
   return send(NAME, SNAPSHOT, null, {expectReply: true, timeout: 0})
 }
 
@@ -226,10 +231,10 @@ async function info() {
 
 export const currentUser = () => {
   return {
-    authenticate,
-    unauthenticate,
-    authorization,
-    subscribe,
-    snapshot,
+    authenticate,  // 授权，登录函数
+    unauthenticate, // 取消授权
+    authorization,  // 用户交易签名认证
+    subscribe,  // 事件监听
+    snapshot,  // 账户信息快照
   }
 }

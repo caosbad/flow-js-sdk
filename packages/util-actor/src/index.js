@@ -14,11 +14,13 @@ const root =
   (typeof global === "object" && global.global === global && global) ||
   (typeof window === "object" && window.window === window && window)
 
+// 全局对象
 root.FCL_REGISTRY = root.FCL_REGISTRY == null ? {} : root.FCL_REGISTRY
 var pid = 0b0
 
 const DEFAULT_TIMEOUT = 5000
 const DEFAULT_TAG = "---"
+// 发送消息
 export const send = (addr, tag, data, opts = {}) =>
   new Promise((reply, reject) => {
     const expectReply = opts.expectReply || false
@@ -53,19 +55,20 @@ export const send = (addr, tag, data, opts = {}) =>
 export const kill = addr => {
   delete root.FCL_REGISTRY[addr]
 }
-
+// 将定义的处理函数进行封装，并注册监听
 const fromHandlers = (handlers = {}) => async ctx => {
   if (typeof handlers[INIT] === "function") await handlers[INIT](ctx)
   __loop: while (1) {
-    const letter = await ctx.receive()
+    const letter = await ctx.receive() // 接收订阅的 send 消息
     try {
       if (letter.tag === EXIT) {
+        // 退出处理函数
         if (typeof handlers[TERMINATE] === "function") {
           await handlers[TERMINATE](ctx, letter, letter.data || {})
         }
         break __loop
       }
-      await handlers[letter.tag](ctx, letter, letter.data || {})
+      await handlers[letter.tag](ctx, letter, letter.data || {}) // 根据接受的消息做不同的函数处理
     } catch (error) {
       console.error(`${ctx.self()} Error`, letter, error)
     } finally {
@@ -74,17 +77,19 @@ const fromHandlers = (handlers = {}) => async ctx => {
   }
 }
 
+// 构造用户信息与响应上下文
 export const spawn = (fn, addr = null) => {
   if (addr == null) addr = ++pid
+  // 判断是否已经有全局的对象
   if (root.FCL_REGISTRY[addr] != null) return addr
-
+  // 定义全局对象，设置所需要的变量
   root.FCL_REGISTRY[addr] = {
-    addr,
-    mailbox: createMailbox(),
-    subs: new Set(),
-    kvs: {},
+    addr, // 服务标志
+    mailbox: createMailbox(), // 通信组件
+    subs: new Set(), // 订阅对象
+    kvs: {}, // 用户数据
   }
-
+  // 定义上下文
   const ctx = {
     self: () => addr,
     receive: () => root.FCL_REGISTRY[addr].mailbox.receive(),
@@ -121,6 +126,7 @@ export const spawn = (fn, addr = null) => {
       return Object.keys(root.FCL_REGISTRY[addr].kvs)
     },
     all: () => {
+      // 返回存储的所有的用户数据
       return root.FCL_REGISTRY[addr].kvs
     },
     where: pattern => {
@@ -131,12 +137,13 @@ export const spawn = (fn, addr = null) => {
       }, {})
     },
     merge: (data = {}) => {
+      // 合并用户信息
       Object.keys(data).forEach(
         key => (root.FCL_REGISTRY[addr].kvs[key] = data[key])
       )
     },
   }
-
+  // 封装在 current-user 中定义的 handlers
   if (typeof fn === "object") fn = fromHandlers(fn)
 
   queueMicrotask(async () => {

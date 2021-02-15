@@ -23,10 +23,10 @@ function normalizeData(data) {
 function findService(type, services) {
   return services.find((d) => d.type === type)
 }
-
+// 构建用户信息
 export async function buildUser(data) {
   data = normalizeData(data)
-
+  // 合并服务信息，拉取授权接口信息
   var services = mergeServices(
     data.services || [],
     await fetchServices(data.hks, data.code)
@@ -35,7 +35,7 @@ export async function buildUser(data) {
   // console.log("BUILD USER", services)
 
   const authn = findService("authn", services)
-
+  // 返回填充后的数据
   return {
     ...USER_PRAGMA,
     addr: withPrefix(data.addr),
