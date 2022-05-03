@@ -1,5 +1,21 @@
 ## 1.0.0-alpha.0
 
+## 1.0.0-alpha.1
+
+### Patch Changes
+
+- 7287ff1: Add blockId to GetTransactionStatus response
+- f7a985b: **BREAKING** Remove deprecated block builders, interaction types and send methods.
+- Updated dependencies [7287ff1]
+- Updated dependencies [9c191c1]
+- Updated dependencies [de47af6]
+- Updated dependencies [b2c95e7]
+- Updated dependencies [828a7b2]
+- Updated dependencies [f7a985b]
+  - @onflow/transport-http@1.0.0-alpha.1
+  - @onflow/config@1.0.0-alpha.1
+  - @onflow/util-actor@1.0.0-alpha.1
+
 ### Major Changes
 
 - Release 1.0.0 alpha

@@ -1,5 +1,11 @@
 ## 1.0.0-alpha.0
 
+## 1.0.0-alpha.1
+
+### Patch Changes
+
+- de47af6: Internal update to util-actor
+
 ### Major Changes
 
 - Release 1.0.0 alpha
