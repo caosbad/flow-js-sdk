@@ -1,5 +1,20 @@
 ## 1.0.0-alpha.1
 
+## 1.0.0-alpha.2
+
+### Patch Changes
+
+- de47af6: Internal update to util-actor
+- ac108e2: Add support for local FCLCrypto contract account-proof/user-signature verification. fcl.config.network or opts.fclCryptoContract override is now required to use this api.
+- f7a985b: **BREAKING** Remove deprecated block builders, interaction types and send methods.
+- Updated dependencies [7287ff1]
+- Updated dependencies [9c191c1]
+- Updated dependencies [de47af6]
+- Updated dependencies [f7a985b]
+  - @onflow/sdk@1.0.0-alpha.1
+  - @onflow/config@1.0.0-alpha.1
+  - @onflow/util-actor@1.0.0-alpha.1
+
 ### Minor Changes
 
 - 21a2dda: Import Buffer from rlp in encode-account-proof
